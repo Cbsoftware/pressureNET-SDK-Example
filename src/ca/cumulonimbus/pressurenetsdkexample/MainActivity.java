@@ -1,5 +1,7 @@
 package ca.cumulonimbus.pressurenetsdkexample;
 
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -16,6 +18,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Toast;
+import ca.cumulonimbus.pressurenetsdk.CbObservation;
 import ca.cumulonimbus.pressurenetsdk.CbService;
 import ca.cumulonimbus.pressurenetsdk.CbSettingsHandler;
 
@@ -74,9 +77,10 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				if(settings!=null) {
-					settings.setDataCollectionFrequency(1000*60*5);
-					settings.saveSettings();
-					String message = "Changed to auto-submit 5 minute interval";
+					settings = settings.getSettings();
+					settings.setDataCollectionFrequency(1000*60*1);
+					setSettings(settings);
+					String message = "Changed to auto-submit 1 minute interval";
 					System.out.println(message);
 					Toast.makeText(getApplicationContext(), message,Toast.LENGTH_LONG).show();
 				} else {
@@ -103,14 +107,6 @@ public class MainActivity extends Activity {
 
 	}
 
-	private void stopAutoSubmit() {
-		
-	}
-	
-	private void askForRecentReadings() {
-		
-	}
-	
 	public void unBindCbService() {
 		if (mBound) {
 			unbindService(mConnection);
@@ -165,9 +161,76 @@ public class MainActivity extends Activity {
 					System.out.println("Error: Settings null");
 				}
 				break;
+			case CbService.MSG_LOCAL_RECENTS:
+				ArrayList<CbObservation> obsList = (ArrayList<CbObservation>) msg.obj;
+				String message = "Received " + obsList.size() + " readings from local database";
+				System.out.println(message);
+				Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+				break;
 			default:
 				super.handleMessage(msg);
 			}
+		}
+	}
+	
+	/**
+	 * Stop all the alarms from firing
+	 */
+	private void stopAutoSubmit() {
+		if (mBound) {
+			System.out.println("Asking for observations");
+
+			Message msg = Message
+					.obtain(null, CbService.MSG_STOP_AUTOSUBMIT, 0, 0);
+			try {
+				msg.replyTo = mMessenger;
+				mService.send(msg);
+			} catch (RemoteException e) {
+				System.out.println("Remote exception: " + e.getMessage());
+			}
+		} else {
+			System.out.println("Error: not bound to service");
+		}
+	}
+	
+	/**
+	 * Get the observations from the Cb database
+	 */
+	private void askForRecentReadings() {
+		if (mBound) {
+			System.out.println("Asking for observations");
+
+			Message msg = Message
+					.obtain(null, CbService.MSG_GET_LOCAL_RECENTS, 0, 0);
+			try {
+				msg.replyTo = mMessenger;
+				mService.send(msg);
+			} catch (RemoteException e) {
+				System.out.println("Remote exception: " + e.getMessage());
+			}
+		} else {
+			System.out.println("Error: not bound to service");
+		}
+	}
+	
+	
+	/**
+	 * Save settings from the Cb database
+	 */
+	private void setSettings(CbSettingsHandler newSettings) {
+		if (mBound) {
+			System.out.println("Saving for settings");
+
+			Message msg = Message
+					.obtain(null, CbService.MSG_SET_SETTINGS, newSettings);
+			try {
+				msg.replyTo = mMessenger;
+				mService.send(msg);
+			} catch (RemoteException e) {
+				System.out.println("Remote exception: " + e.getMessage());
+			}
+		} else {
+			System.out.println("Error: not bound to service");
 		}
 	}
 	
@@ -176,7 +239,7 @@ public class MainActivity extends Activity {
 	 */
 	private void askForSettings() {
 		if (mBound) {
-			System.out.println("asking for settings");
+			System.out.println("Asking for settings");
 
 			Message msg = Message
 					.obtain(null, CbService.MSG_GET_SETTINGS, 0, 0);
