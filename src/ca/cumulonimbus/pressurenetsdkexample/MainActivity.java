@@ -73,7 +73,15 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
-
+				if(settings!=null) {
+					settings.setDataCollectionFrequency(1000*60*5);
+					settings.saveSettings();
+					String message = "Changed to auto-submit 5 minute interval";
+					System.out.println(message);
+					Toast.makeText(getApplicationContext(), message,Toast.LENGTH_LONG).show();
+				} else {
+					Toast.makeText(getApplicationContext(), "Please load settings first", Toast.LENGTH_LONG).show();
+				}
 			}
 		});
 
@@ -81,7 +89,7 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
-
+				askForRecentReadings();
 			}
 		});
 
@@ -89,12 +97,20 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
-
+				stopAutoSubmit();
 			}
 		});
 
 	}
 
+	private void stopAutoSubmit() {
+		
+	}
+	
+	private void askForRecentReadings() {
+		
+	}
+	
 	public void unBindCbService() {
 		if (mBound) {
 			unbindService(mConnection);
