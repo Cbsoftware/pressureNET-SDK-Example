@@ -8,5 +8,43 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity" >
 
+    <Button
+        android:id="@+id/buttonStartService"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:text="Start Service" />
+
+    <Button
+        android:id="@+id/buttonCheckSettings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/buttonStartService"
+        android:text="Check Settings" />
+
+    <Button
+        android:id="@+id/buttonChangeSetting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/buttonCheckSettings"
+        android:text="Change Setting" />
+    
+       <Button
+        android:id="@+id/buttonGetRecentReadings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/buttonChangeSetting"
+        android:text="Get recent readings" />
+    
+    
+    <Button
+        android:id="@+id/buttonStopAutoSubmit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/buttonGetRecentReadings"
+        android:text="Stop Auto-Submit" />
+    
+    
 
 </RelativeLayout>

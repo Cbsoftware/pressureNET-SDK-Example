@@ -22,6 +22,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+          <service
+            android:name="ca.cumulonimbus.pressurenetsdk.CbService"
+            android:enabled="true" >
+            <intent-filter>
+                <action android:name="ca.cumulonimbus.pressurenetsdk.ACTION_SEND_MEASUREMENT" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>
