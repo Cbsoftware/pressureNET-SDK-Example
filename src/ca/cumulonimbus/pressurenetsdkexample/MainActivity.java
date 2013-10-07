@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Toast;
+import ca.cumulonimbus.pressurenetsdk.CbApiCall;
 import ca.cumulonimbus.pressurenetsdk.CbObservation;
 import ca.cumulonimbus.pressurenetsdk.CbService;
 import ca.cumulonimbus.pressurenetsdk.CbSettingsHandler;
@@ -29,13 +30,14 @@ public class MainActivity extends Activity {
 	private Button buttonChangeSetting;
 	private Button buttonGetRecentReadings;
 	private Button buttonStopAutoSubmit;
+	private Button buttonStopService;
 
-	// pressureNET 4.0
 	// SDK communication
 	boolean mBound;
 	private Messenger mMessenger = new Messenger(new IncomingHandler());
 	Messenger mService = null;
 	CbSettingsHandler settings;
+	Intent serviceIntent;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -51,15 +53,16 @@ public class MainActivity extends Activity {
 		buttonChangeSetting = (Button) findViewById(R.id.buttonChangeSetting);
 		buttonGetRecentReadings = (Button) findViewById(R.id.buttonGetRecentReadings);
 		buttonStopAutoSubmit = (Button) findViewById(R.id.buttonStopAutoSubmit);
+		buttonStopService = (Button) findViewById(R.id.buttonStopService);
 
 		buttonStartService.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
 				System.out.println("starting service");
-				Intent intent = new Intent(getApplicationContext(),
+				serviceIntent = new Intent(getApplicationContext(),
 						CbService.class);
-				startService(intent);
+				startService(serviceIntent);
 				bindCbService();
 			}
 		});
@@ -93,7 +96,14 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
-				askForRecentReadings();
+				CbApiCall api = new CbApiCall();
+				api.setMinLat(-90);
+				api.setMaxLat(90);
+				api.setMinLon(-180);
+				api.setMaxLon(180);
+				api.setStartTime(0);
+				api.setEndTime(System.currentTimeMillis());
+				askForRecentReadings(api);
 			}
 		});
 
@@ -102,6 +112,16 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				stopAutoSubmit();
+			}
+		});
+		
+		buttonStopService.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				System.out.println("Unbinding, stopping service");
+				unBindCbService();
+				stopService(serviceIntent);
 			}
 		});
 
@@ -178,10 +198,10 @@ public class MainActivity extends Activity {
 	 */
 	private void stopAutoSubmit() {
 		if (mBound) {
-			System.out.println("Asking for observations");
+			System.out.println("Stop auto-submit");
 
 			Message msg = Message
-					.obtain(null, CbService.MSG_STOP_AUTOSUBMIT, 0, 0);
+					.obtain(null, CbService.MSG_STOP, 0, 0);
 			try {
 				msg.replyTo = mMessenger;
 				mService.send(msg);
@@ -196,12 +216,12 @@ public class MainActivity extends Activity {
 	/**
 	 * Get the observations from the Cb database
 	 */
-	private void askForRecentReadings() {
+	private void askForRecentReadings(CbApiCall apiCall) {
 		if (mBound) {
 			System.out.println("Asking for observations");
 
 			Message msg = Message
-					.obtain(null, CbService.MSG_GET_LOCAL_RECENTS, 0, 0);
+					.obtain(null, CbService.MSG_GET_LOCAL_RECENTS, apiCall );
 			try {
 				msg.replyTo = mMessenger;
 				mService.send(msg);
@@ -252,13 +272,6 @@ public class MainActivity extends Activity {
 		} else {
 			System.out.println("Error: not bound to service");
 		}
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
 	}
 
 }
