@@ -80,7 +80,6 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				if(settings!=null) {
-					settings = settings.getSettings();
 					settings.setDataCollectionFrequency(1000*60*1);
 					setSettings(settings);
 					String message = "Changed to auto-submit 1 minute interval";
@@ -124,7 +123,14 @@ public class MainActivity extends Activity {
 				stopService(serviceIntent);
 			}
 		});
+	}
+	
+	
 
+	@Override
+	protected void onStop() {
+		unBindCbService();
+		super.onStop();
 	}
 
 	public void unBindCbService() {
@@ -239,7 +245,7 @@ public class MainActivity extends Activity {
 	 */
 	private void setSettings(CbSettingsHandler newSettings) {
 		if (mBound) {
-			System.out.println("Saving for settings");
+			System.out.println("Saving settings: " + newSettings);
 
 			Message msg = Message
 					.obtain(null, CbService.MSG_SET_SETTINGS, newSettings);
