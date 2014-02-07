@@ -1,57 +1,73 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
     tools:context=".MainActivity" >
 
-    <Button
-        android:id="@+id/buttonStartService"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:text="Start Service" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin" >
 
-    <Button
-        android:id="@+id/buttonCheckSettings"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/buttonStartService"
-        android:text="Check Settings" />
+        <Button
+            android:id="@+id/buttonStartService"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:text="Start Service" />
 
-    <Button
-        android:id="@+id/buttonChangeSetting"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/buttonCheckSettings"
-        android:text="Change Setting" />
-    
-       <Button
-        android:id="@+id/buttonGetRecentReadings"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/buttonChangeSetting"
-        android:text="Get recent readings" />
-      
-    <Button
-        android:id="@+id/buttonStopAutoSubmit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/buttonGetRecentReadings"
-        android:text="Stop Auto-Submit" />
-    
-    
-    <Button
-        android:id="@+id/buttonStopService"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/buttonStopAutoSubmit"
-        android:text="Stop Service" />
-    
-    
+        <Button
+            android:id="@+id/buttonCheckSettings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/buttonStartService"
+            android:text="Check Settings" />
 
-</RelativeLayout>
+        <Button
+            android:id="@+id/buttonChangeSetting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/buttonCheckSettings"
+            android:text="Change Setting" />
+
+        <Button
+            android:id="@+id/buttonGetRecentReadings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/buttonChangeSetting"
+            android:text="Get recent readings" />
+
+        <Button
+            android:id="@+id/buttonStartStream"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/buttonGetRecentReadings"
+            android:text="Start sensor stream" />
+
+        <Button
+            android:id="@+id/buttonStopStream"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/buttonStartStream"
+            android:text="Stop sensor stream" />
+
+        <Button
+            android:id="@+id/buttonStopAutoSubmit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/buttonStopStream"
+            android:text="Stop Auto-Submit" />
+
+        <Button
+            android:id="@+id/buttonStopService"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/buttonStopAutoSubmit"
+            android:text="Stop Service" />
+    </RelativeLayout>
+
+</ScrollView>

@@ -7,6 +7,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.hardware.Sensor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -29,10 +30,12 @@ public class MainActivity extends Activity {
 	private Button buttonCheckSettings;
 	private Button buttonChangeSetting;
 	private Button buttonGetRecentReadings;
+	private Button buttonStartStream;
+	private Button buttonStopStream;
 	private Button buttonStopAutoSubmit;
 	private Button buttonStopService;
-
-	// SDK communication
+	
+		// SDK communication
 	boolean mBound;
 	private Messenger mMessenger = new Messenger(new IncomingHandler());
 	Messenger mService = null;
@@ -53,6 +56,8 @@ public class MainActivity extends Activity {
 		buttonChangeSetting = (Button) findViewById(R.id.buttonChangeSetting);
 		buttonGetRecentReadings = (Button) findViewById(R.id.buttonGetRecentReadings);
 		buttonStopAutoSubmit = (Button) findViewById(R.id.buttonStopAutoSubmit);
+		buttonStartStream = (Button) findViewById(R.id.buttonStartStream);
+		buttonStopStream = (Button) findViewById(R.id.buttonStopStream);
 		buttonStopService = (Button) findViewById(R.id.buttonStopService);
 
 		buttonStartService.setOnClickListener(new OnClickListener() {
@@ -105,7 +110,23 @@ public class MainActivity extends Activity {
 				askForRecentReadings(api);
 			}
 		});
+		
+		buttonStartStream.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				startStream(Sensor.TYPE_PRESSURE);
+			}
+		});
 
+		buttonStopStream.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				stopStream(Sensor.TYPE_PRESSURE);
+			}
+		});
+		
 		buttonStopAutoSubmit.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -193,6 +214,10 @@ public class MainActivity extends Activity {
 				System.out.println(message);
 				Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
 				break;
+			case CbService.MSG_DATA_STREAM:
+				CbObservation obs = (CbObservation) msg.obj;
+				System.out.println("Received streaming value: " + obs.getObservationValue());
+				break; 
 			default:
 				super.handleMessage(msg);
 			}
@@ -208,6 +233,46 @@ public class MainActivity extends Activity {
 
 			Message msg = Message
 					.obtain(null, CbService.MSG_STOP, 0, 0);
+			try {
+				msg.replyTo = mMessenger;
+				mService.send(msg);
+			} catch (RemoteException e) {
+				System.out.println("Remote exception: " + e.getMessage());
+			}
+		} else {
+			System.out.println("Error: not bound to service");
+		}
+	}
+	
+	/**
+	 * Start streaming sensor data
+	 */
+	private void startStream(int sensor) {
+		if (mBound) {
+			System.out.println("Starting sensor stream");
+
+			Message msg = Message
+					.obtain(null, CbService.MSG_START_STREAM, sensor, 0);
+			try {
+				msg.replyTo = mMessenger;
+				mService.send(msg);
+			} catch (RemoteException e) {
+				System.out.println("Remote exception: " + e.getMessage());
+			}
+		} else {
+			System.out.println("Error: not bound to service");
+		}
+	}
+	
+	/**
+	 * Stop streaming sensor data
+	 */
+	private void stopStream(int sensor) {
+		if (mBound) {
+			System.out.println("Stopping sensor stream");
+
+			Message msg = Message
+					.obtain(null, CbService.MSG_STOP_STREAM, sensor, 0);
 			try {
 				msg.replyTo = mMessenger;
 				mService.send(msg);
