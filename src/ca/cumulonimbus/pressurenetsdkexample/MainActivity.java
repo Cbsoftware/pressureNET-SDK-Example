@@ -26,6 +26,7 @@ import ca.cumulonimbus.pressurenetsdk.CbSettingsHandler;
 
 public class MainActivity extends Activity {
 
+	private Button buttonSendSingleObs;
 	private Button buttonStartService;
 	private Button buttonCheckSettings;
 	private Button buttonChangeSetting;
@@ -35,7 +36,7 @@ public class MainActivity extends Activity {
 	private Button buttonStopAutoSubmit;
 	private Button buttonStopService;
 	
-		// SDK communication
+	// SDK communication
 	boolean mBound;
 	private Messenger mMessenger = new Messenger(new IncomingHandler());
 	Messenger mService = null;
@@ -51,6 +52,7 @@ public class MainActivity extends Activity {
 	}
 
 	private void setClickListeners() {
+		buttonSendSingleObs = (Button) findViewById(R.id.buttonSendSingleObs);
 		buttonStartService = (Button) findViewById(R.id.buttonStartService);
 		buttonCheckSettings = (Button) findViewById(R.id.buttonCheckSettings);
 		buttonChangeSetting = (Button) findViewById(R.id.buttonChangeSetting);
@@ -60,6 +62,17 @@ public class MainActivity extends Activity {
 		buttonStopStream = (Button) findViewById(R.id.buttonStopStream);
 		buttonStopService = (Button) findViewById(R.id.buttonStopService);
 
+		buttonSendSingleObs.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				System.out.println("sending single measurement");
+				Intent intent = new Intent(getApplicationContext(), CbService.class);
+				intent.setAction(CbService.ACTION_SEND_MEASUREMENT);
+				startService(intent);
+			}
+		});
+		
 		buttonStartService.setOnClickListener(new OnClickListener() {
 
 			@Override
