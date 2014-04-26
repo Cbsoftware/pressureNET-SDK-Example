@@ -75,6 +75,13 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/buttonStopAutoSubmit"
             android:text="Stop Service" />
+        
+        <Button
+            android:id="@+id/buttonRunTests"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/buttonStopService"
+            android:text="Run Tests" />
     </RelativeLayout>
 
 </ScrollView>

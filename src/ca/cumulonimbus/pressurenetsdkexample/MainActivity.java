@@ -1,12 +1,15 @@
 package ca.cumulonimbus.pressurenetsdkexample;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.hardware.Sensor;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,7 +17,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -35,7 +37,8 @@ public class MainActivity extends Activity {
 	private Button buttonStopStream;
 	private Button buttonStopAutoSubmit;
 	private Button buttonStopService;
-	
+	private Button buttonRunTests;
+
 	// SDK communication
 	boolean mBound;
 	private Messenger mMessenger = new Messenger(new IncomingHandler());
@@ -61,18 +64,28 @@ public class MainActivity extends Activity {
 		buttonStartStream = (Button) findViewById(R.id.buttonStartStream);
 		buttonStopStream = (Button) findViewById(R.id.buttonStopStream);
 		buttonStopService = (Button) findViewById(R.id.buttonStopService);
+		buttonRunTests = (Button) findViewById(R.id.buttonRunTests);
+
+		buttonRunTests.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// runTests();
+			}
+		});
 
 		buttonSendSingleObs.setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
 				System.out.println("sending single measurement");
-				Intent intent = new Intent(getApplicationContext(), CbService.class);
+				Intent intent = new Intent(getApplicationContext(),
+						CbService.class);
 				intent.setAction(CbService.ACTION_SEND_MEASUREMENT);
 				startService(intent);
 			}
 		});
-		
+
 		buttonStartService.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -97,14 +110,17 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
-				if(settings!=null) {
-					settings.setDataCollectionFrequency(1000*60*1);
+				if (settings != null) {
+					settings.setDataCollectionFrequency(1000 * 60 * 1);
 					setSettings(settings);
 					String message = "Changed to auto-submit 1 minute interval";
 					System.out.println(message);
-					Toast.makeText(getApplicationContext(), message,Toast.LENGTH_LONG).show();
+					Toast.makeText(getApplicationContext(), message,
+							Toast.LENGTH_LONG).show();
 				} else {
-					Toast.makeText(getApplicationContext(), "Please load settings first", Toast.LENGTH_LONG).show();
+					Toast.makeText(getApplicationContext(),
+							"Please load settings first", Toast.LENGTH_LONG)
+							.show();
 				}
 			}
 		});
@@ -123,9 +139,9 @@ public class MainActivity extends Activity {
 				askForRecentReadings(api);
 			}
 		});
-		
+
 		buttonStartStream.setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
 				startStream(Sensor.TYPE_PRESSURE);
@@ -133,13 +149,13 @@ public class MainActivity extends Activity {
 		});
 
 		buttonStopStream.setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
 				stopStream(Sensor.TYPE_PRESSURE);
 			}
 		});
-		
+
 		buttonStopAutoSubmit.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -147,7 +163,7 @@ public class MainActivity extends Activity {
 				stopAutoSubmit();
 			}
 		});
-		
+
 		buttonStopService.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -158,8 +174,6 @@ public class MainActivity extends Activity {
 			}
 		});
 	}
-	
-	
 
 	@Override
 	protected void onStop() {
@@ -176,13 +190,13 @@ public class MainActivity extends Activity {
 
 	public void bindCbService() {
 		System.out.println("Binding to CbService");
-		if(!mBound) {
+		if (!mBound) {
 			bindService(new Intent(getApplicationContext(), CbService.class),
 					mConnection, Context.BIND_AUTO_CREATE);
-			
+
 		}
 	}
-	
+
 	/**
 	 * Communicate with CbService
 	 */
@@ -192,21 +206,20 @@ public class MainActivity extends Activity {
 			mService = new Messenger(service);
 			mBound = true;
 			Message msg = Message.obtain(null, CbService.MSG_OKAY);
-			
+
 		}
-		
-		
+
 		public void onServiceDisconnected(ComponentName className) {
 			System.out.println("Service disconnected");
 			mMessenger = null;
 			mBound = false;
 		}
 	};
-	
+
 	/**
-	 * Handle incoming communication from CbService. Listen for messages
-	 * and act when they're received, sometimes responding with answers.
-	 *
+	 * Handle incoming communication from CbService. Listen for messages and act
+	 * when they're received, sometimes responding with answers.
+	 * 
 	 */
 	class IncomingHandler extends Handler {
 		@Override
@@ -216,27 +229,31 @@ public class MainActivity extends Activity {
 				settings = (CbSettingsHandler) msg.obj;
 				if (settings != null) {
 					System.out.println("Settings:\n" + settings);
-					Toast.makeText(getApplicationContext(), "Settings:\n" + settings, Toast.LENGTH_LONG).show();
+					Toast.makeText(getApplicationContext(),
+							"Settings:\n" + settings, Toast.LENGTH_LONG).show();
 				} else {
 					System.out.println("Error: Settings null");
 				}
 				break;
 			case CbService.MSG_LOCAL_RECENTS:
 				ArrayList<CbObservation> obsList = (ArrayList<CbObservation>) msg.obj;
-				String message = "Received " + obsList.size() + " readings from local database";
+				String message = "Received " + obsList.size()
+						+ " readings from local database";
 				System.out.println(message);
-				Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+				Toast.makeText(getApplicationContext(), message,
+						Toast.LENGTH_LONG).show();
 				break;
 			case CbService.MSG_DATA_STREAM:
 				CbObservation obs = (CbObservation) msg.obj;
-				System.out.println("Received streaming value: " + obs.getObservationValue());
-				break; 
+				System.out.println("Received streaming value: "
+						+ obs.getObservationValue());
+				break;
 			default:
 				super.handleMessage(msg);
 			}
 		}
 	}
-	
+
 	/**
 	 * Stop all the alarms from firing
 	 */
@@ -244,8 +261,7 @@ public class MainActivity extends Activity {
 		if (mBound) {
 			System.out.println("Stop auto-submit");
 
-			Message msg = Message
-					.obtain(null, CbService.MSG_STOP, 0, 0);
+			Message msg = Message.obtain(null, CbService.MSG_STOP, 0, 0);
 			try {
 				msg.replyTo = mMessenger;
 				mService.send(msg);
@@ -256,7 +272,7 @@ public class MainActivity extends Activity {
 			System.out.println("Error: not bound to service");
 		}
 	}
-	
+
 	/**
 	 * Start streaming sensor data
 	 */
@@ -264,8 +280,8 @@ public class MainActivity extends Activity {
 		if (mBound) {
 			System.out.println("Starting sensor stream");
 
-			Message msg = Message
-					.obtain(null, CbService.MSG_START_STREAM, sensor, 0);
+			Message msg = Message.obtain(null, CbService.MSG_START_STREAM,
+					sensor, 0);
 			try {
 				msg.replyTo = mMessenger;
 				mService.send(msg);
@@ -276,7 +292,7 @@ public class MainActivity extends Activity {
 			System.out.println("Error: not bound to service");
 		}
 	}
-	
+
 	/**
 	 * Stop streaming sensor data
 	 */
@@ -284,8 +300,8 @@ public class MainActivity extends Activity {
 		if (mBound) {
 			System.out.println("Stopping sensor stream");
 
-			Message msg = Message
-					.obtain(null, CbService.MSG_STOP_STREAM, sensor, 0);
+			Message msg = Message.obtain(null, CbService.MSG_STOP_STREAM,
+					sensor, 0);
 			try {
 				msg.replyTo = mMessenger;
 				mService.send(msg);
@@ -296,7 +312,7 @@ public class MainActivity extends Activity {
 			System.out.println("Error: not bound to service");
 		}
 	}
-	
+
 	/**
 	 * Get the observations from the Cb database
 	 */
@@ -304,8 +320,8 @@ public class MainActivity extends Activity {
 		if (mBound) {
 			System.out.println("Asking for observations");
 
-			Message msg = Message
-					.obtain(null, CbService.MSG_GET_LOCAL_RECENTS, apiCall );
+			Message msg = Message.obtain(null, CbService.MSG_GET_LOCAL_RECENTS,
+					apiCall);
 			try {
 				msg.replyTo = mMessenger;
 				mService.send(msg);
@@ -316,8 +332,7 @@ public class MainActivity extends Activity {
 			System.out.println("Error: not bound to service");
 		}
 	}
-	
-	
+
 	/**
 	 * Save settings from the Cb database
 	 */
@@ -325,8 +340,8 @@ public class MainActivity extends Activity {
 		if (mBound) {
 			System.out.println("Saving settings: " + newSettings);
 
-			Message msg = Message
-					.obtain(null, CbService.MSG_SET_SETTINGS, newSettings);
+			Message msg = Message.obtain(null, CbService.MSG_SET_SETTINGS,
+					newSettings);
 			try {
 				msg.replyTo = mMessenger;
 				mService.send(msg);
@@ -337,7 +352,7 @@ public class MainActivity extends Activity {
 			System.out.println("Error: not bound to service");
 		}
 	}
-	
+
 	/**
 	 * Get the settings from the Cb database
 	 */
@@ -356,6 +371,10 @@ public class MainActivity extends Activity {
 		} else {
 			System.out.println("Error: not bound to service");
 		}
+	}
+
+	private void log(String message) {
+		System.out.println(message);
 	}
 
 }
