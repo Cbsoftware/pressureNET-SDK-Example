@@ -81,7 +81,9 @@ public class MainActivity extends Activity {
 				System.out.println("sending single measurement");
 				Intent intent = new Intent(getApplicationContext(),
 						CbService.class);
-				intent.setAction(CbService.ACTION_SEND_MEASUREMENT);
+				intent.setAction(CbService.ACTION_SEND_MEASUREMENT_WITH_LOCATION);
+				intent.putExtra("latitude", 43.663d);
+				intent.putExtra("longitude", -79.387d);
 				startService(intent);
 			}
 		});
